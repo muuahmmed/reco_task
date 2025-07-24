@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:reco_test/screens/home/main_home/main_home_screen.dart';
+import 'package:reco_test/screens/login/cubit/login_cubit.dart';
+import 'package:reco_test/screens/login/cubit/login_states.dart';
+import '../../components/componets.dart';
+import '../../services/auth/auth_repo.dart';
+import '../onboarding/onboarding.dart';
 import '../sign_up/sign_up_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -85,15 +92,17 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
-  // void _submitForm(BuildContext context) {
-  //   if (_formKey.currentState!.validate()) {
-  //     final cubit = LoginCubit.get(context);
-  //     cubit.login(
-  //       email: _emailController.text.trim(),
-  //       password: _passwordController.text.trim(),
-  //     );
-  //   }
-  // }
+  void _submitForm(BuildContext context) {
+    if (_formKey.currentState!.validate()) {
+      final cubit = ShopLoginCubit.get(context);
+      cubit.userLogin(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+        rememberMe: true,
+      );
+    }
+  }
+
 
   void _navigateToRegister(BuildContext context) {
     Navigator.push(
@@ -126,302 +135,322 @@ class _LoginScreenState extends State<LoginScreen>
     final primaryColor = theme.primaryColor;
     final onPrimaryColor = theme.colorScheme.onPrimary;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 40),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Logo with combined animations
-              AnimatedBuilder(
-                animation: _controller,
-                builder: (context, child) {
-                  return SlideTransition(
-                    position: _slideAnimation,
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: ScaleTransition(
-                        scale: _scaleAnimation,
-                        child: SizedBox(
-                          height:
-                          MediaQuery.of(context).size.height * 0.35,
-                          child: Image.asset(
-                            'assets/splash_screen/nawel.png',
-                            width: double.infinity,
+    return BlocProvider(
+
+      create: (context) => ShopLoginCubit(getIt<AuthRepo>()),
+      child: BlocConsumer<ShopLoginCubit, ShopLoginStates>(
+        listener: (context, state) {
+          if (state is ShopLoginSuccessState) {
+            navigateAndFinish(context, const MainHomeScreen());
+            showToast(text: 'Login Successful', state: ToastStates.SUCCESS);
+          } else if (state is ShopLoginErrorState) {
+            showToast(text: state.error, state: ToastStates.ERROR);
+          } else if (state is ShopForgotPasswordSuccessState) {
+            showToast(
+              text: 'Password reset sent to ${state.email}',
+              state: ToastStates.SUCCESS,
+            );
+            Navigator.pop(context);
+          } else if (state is ShopForgotPasswordErrorState) {
+            showToast(text: state.error, state: ToastStates.ERROR);
+          }
+        },
+        builder: (BuildContext context, ShopLoginStates state) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Logo with combined animations
+                    AnimatedBuilder(
+                      animation: _controller,
+                      builder: (context, child) {
+                        return SlideTransition(
+                          position: _slideAnimation,
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: ScaleTransition(
+                              scale: _scaleAnimation,
+                              child: SizedBox(
+                                height:
+                                MediaQuery.of(context).size.height * 0.35,
+                                child: Image.asset(
+                                  'assets/splash_screen/nawel.png',
+                                  width: double.infinity,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
 
-              // Form with slide up animation
-              AnimatedBuilder(
-                animation: _controller,
-                builder: (context, child) {
-                  return Transform.translate(
-                    offset: Offset(0, _formSlideAnimation.value),
-                    child: Opacity(
-                      opacity: _fadeAnimation.value,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                        ),
-                        child: Column(
-                          children: [
-                            // Email field with animation
-                            ScaleTransition(
-                              scale: _buttonScaleAnimation,
-                              child: TextFormField(
-                                controller: _emailController,
-                                decoration: InputDecoration(
-                                  labelText: 'Email',
-                                  prefixIcon: Icon(
-                                    Icons.email_outlined,
-                                    color: primaryColor,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      10,
-                                    ),
-                                    borderSide: BorderSide(
-                                      color: primaryColor,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      10,
-                                    ),
-                                    borderSide: BorderSide(
-                                      color: primaryColor,
-                                      width: 2,
-                                    ),
-                                  ),
-                                ),
-                                keyboardType: TextInputType.emailAddress,
-                                textInputAction: TextInputAction.next,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your email';
-                                  }
-                                  if (!RegExp(
-                                    r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$',
-                                  ).hasMatch(value)) {
-                                    return 'Please enter a valid email';
-                                  }
-                                  return null;
-                                },
+                    // Form with slide up animation
+                    AnimatedBuilder(
+                      animation: _controller,
+                      builder: (context, child) {
+                        return Transform.translate(
+                          offset: Offset(0, _formSlideAnimation.value),
+                          child: Opacity(
+                            opacity: _fadeAnimation.value,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
                               ),
-                            ),
-                            const SizedBox(height: 20),
-
-                            // Password field with animation
-                            ScaleTransition(
-                              scale: _buttonScaleAnimation,
-                              child: TextFormField(
-                                controller: _passwordController,
-                                obscureText: _obscurePassword,
-                                decoration: InputDecoration(
-                                  labelText: 'Password',
-                                  prefixIcon: Icon(
-                                    Icons.lock_outline,
-                                    color: primaryColor,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      10,
-                                    ),
-                                    borderSide: BorderSide(
-                                      color: primaryColor,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      10,
-                                    ),
-                                    borderSide: BorderSide(
-                                      color: primaryColor,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _obscurePassword
-                                          ? Icons.visibility_outlined
-                                          : Icons.visibility_off_outlined,
-                                      color: primaryColor,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        _obscurePassword =
-                                        !_obscurePassword;
-                                      });
-                                    },
-                                  ),
-                                ),
-                                textInputAction: TextInputAction.done,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your password';
-                                  }
-                                  if (value.length < 6) {
-                                    return 'Password must be at least 6 characters';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                const Spacer(),
-                                TextButton(
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          title: const Text(
-                                            'Forgot Password?',
-                                          ),
-                                          content: const Text(
-                                            'Enter your email to reset your password.',
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: const Text('Cancel'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () {
-                                                // final email =
-                                                // _emailController.text
-                                                //     .trim();
-                                                // if (email.isEmpty) {
-                                                //   showToast(
-                                                //     text:
-                                                //     'Please enter your email',
-                                                //     state:
-                                                //     ToastStates.ERROR,
-                                                //   );
-                                                //   return;
-                                                // }
-                                                // LoginCubit.get(
-                                                //   context,
-                                                // ).forgotPassword(
-                                                //   email: email,
-                                                // );
-                                              },
-                                              child: const Text('Send'),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    );
-                                  },
-                                  child: const Text(
-                                    'Forgot Password?',
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            // Login Button with enhanced animation
-                            AnimatedBuilder(
-                              animation: _controller,
-                              builder: (context, child) {
-                                return ScaleTransition(
-                                  scale: _buttonScaleAnimation,
-                                  child: SizedBox(
-                                    width: buttonWidth,
-                                    height: 50,
-                                    child:
-                                    // state is LoginLoadingState
-                                    //     ? const Center(
-                                    //   child:
-                                    //   CircularProgressIndicator(),
-                                    // )
-                                    //     :
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                        primaryColor,
-                                        foregroundColor:
-                                        onPrimaryColor,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                          BorderRadius.circular(
+                              child: Column(
+                                children: [
+                                  // Email field with animation
+                                  ScaleTransition(
+                                    scale: _buttonScaleAnimation,
+                                    child: TextFormField(
+                                      controller: _emailController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Email',
+                                        prefixIcon: Icon(
+                                          Icons.email_outlined,
+                                          color: primaryColor,
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
                                             10,
                                           ),
+                                          borderSide: BorderSide(
+                                            color: primaryColor,
+                                          ),
                                         ),
-                                        elevation: 4,
-                                        shadowColor: primaryColor,
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                          borderSide: BorderSide(
+                                            color: primaryColor,
+                                            width: 2,
+                                          ),
+                                        ),
                                       ),
-                                      onPressed:
-                                      (){
-                                        // _submitForm(
-                                        //   context,
-                                        // );
+                                      keyboardType: TextInputType.emailAddress,
+                                      textInputAction: TextInputAction.next,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your email';
+                                        }
+                                        if (!RegExp(
+                                          r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                        ).hasMatch(value)) {
+                                          return 'Please enter a valid email';
+                                        }
+                                        return null;
                                       },
-                                      child: const Text(
-                                        'LOGIN',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight:
-                                          FontWeight.bold,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
                                     ),
                                   ),
-                                );
-                              },
-                            ),
-                            const SizedBox(height: 30),
+                                  const SizedBox(height: 20),
 
-                            // Register button with animation
-                            FadeTransition(
-                              opacity: _fadeAnimation,
-                              child: Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.center,
-                                children: [
-                                  TextButton(
-                                    onPressed:
-                                        () =>
-                                        _navigateToRegister(context),
-                                    child: Text(
-                                      'Create an account',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: primaryColor,
-                                        fontSize: 14,
+                                  // Password field with animation
+                                  ScaleTransition(
+                                    scale: _buttonScaleAnimation,
+                                    child: TextFormField(
+                                      controller: _passwordController,
+                                      obscureText: _obscurePassword,
+                                      decoration: InputDecoration(
+                                        labelText: 'Password',
+                                        prefixIcon: Icon(
+                                          Icons.lock_outline,
+                                          color: primaryColor,
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                          borderSide: BorderSide(
+                                            color: primaryColor,
+                                          ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                          borderSide: BorderSide(
+                                            color: primaryColor,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        suffixIcon: IconButton(
+                                          icon: Icon(
+                                            _obscurePassword
+                                                ? Icons.visibility_outlined
+                                                : Icons.visibility_off_outlined,
+                                            color: primaryColor,
+                                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              _obscurePassword =
+                                              !_obscurePassword;
+                                            });
+                                          },
+                                        ),
                                       ),
+                                      textInputAction: TextInputAction.done,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your password';
+                                        }
+                                        if (value.length < 6) {
+                                          return 'Password must be at least 6 characters';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      const Spacer(),
+                                      TextButton(
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) {
+                                              return AlertDialog(
+                                                title: const Text(
+                                                  'Forgot Password?',
+                                                ),
+                                                content: const Text(
+                                                  'Enter your email to reset your password.',
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: const Text('Cancel'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      final email =
+                                                      _emailController.text
+                                                          .trim();
+                                                      if (email.isEmpty) {
+                                                        showToast(
+                                                          text:
+                                                          'Please enter your email',
+                                                          state:
+                                                          ToastStates.ERROR,
+                                                        );
+                                                        return;
+                                                      }
+                                                      ShopLoginCubit.get(context).sendPasswordResetEmail(email);
+                                                    },
+                                                    child: const Text('Send'),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                        },
+                                        child: const Text(
+                                          'Forgot Password?',
+                                          style: TextStyle(
+                                            color: Colors.red,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  // Login Button with enhanced animation
+                                  AnimatedBuilder(
+                                    animation: _controller,
+                                    builder: (context, child) {
+                                      return ScaleTransition(
+                                        scale: _buttonScaleAnimation,
+                                        child: SizedBox(
+                                          width: buttonWidth,
+                                          height: 50,
+                                          child:
+                                          state is ShopLoginLoadingState
+                                              ? const Center(
+                                            child:
+                                            CircularProgressIndicator(),
+                                          )
+                                              :
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                              primaryColor,
+                                              foregroundColor:
+                                              onPrimaryColor,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                BorderRadius.circular(
+                                                  10,
+                                                ),
+                                              ),
+                                              elevation: 4,
+                                              shadowColor: primaryColor,
+                                            ),
+                                            onPressed:
+                                                (){
+                                              _submitForm(
+                                                context,
+                                              );
+                                            },
+                                            child: const Text(
+                                              'LOGIN',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight:
+                                                FontWeight.bold,
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(height: 30),
+
+                                  // Register button with animation
+                                  FadeTransition(
+                                    opacity: _fadeAnimation,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                      children: [
+                                        TextButton(
+                                          onPressed:
+                                              () =>
+                                              _navigateToRegister(context),
+                                          child: Text(
+                                            'Create an account',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: primaryColor,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

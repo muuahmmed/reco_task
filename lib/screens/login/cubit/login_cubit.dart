@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../cache/cache_helper.dart';
 import '../../../services/auth/auth_repo.dart';
@@ -7,6 +8,9 @@ class ShopLoginCubit extends Cubit<ShopLoginStates> {
   final AuthRepo authRepo;
 
   ShopLoginCubit(this.authRepo) : super(const ShopLoginInitialState());
+
+  static ShopLoginCubit get(BuildContext context) =>
+      BlocProvider.of<ShopLoginCubit>(context);
 
   Future<void> userLogin({
     required String email,
@@ -33,7 +37,6 @@ class ShopLoginCubit extends Cubit<ShopLoginStates> {
       emit(ShopLoginErrorState(e.toString(), stackTrace));
     }
   }
-
 
   Future<void> sendPasswordResetEmail(String email) async {
     emit(const ShopForgotPasswordLoadingState());

@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../components/componets.dart';
+import '../../services/auth/auth_repo.dart';
 import '../login/login_screen.dart';
+import '../onboarding/onboarding.dart';
+import 'cubit/sign_up_cubit.dart';
+import 'cubit/sign_up_states.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -98,22 +104,22 @@ class _RegisterScreenState extends State<RegisterScreen>
     super.dispose();
   }
 
-  // void _submitForm(BuildContext context) {
-  //   if (_formKey.currentState!.validate()) {
-  //     if (_passwordController.text != _confirmPasswordController.text) {
-  //       showToast(text: 'Passwords do not match', state: ToastStates.ERROR);
-  //       return;
-  //     }
-  //
-  //     final cubit = RegisterCubit.get(context);
-  //     cubit.signup(
-  //       email: _emailController.text.trim(),
-  //       password: _passwordController.text.trim(),
-  //       name: _nameController.text.trim(),
-  //       confirmPassword: _confirmPasswordController.text.trim(),
-  //     );
-  //   }
-  // }
+  void _submitForm(BuildContext context) {
+    if (_formKey.currentState!.validate()) {
+      if (_passwordController.text != _confirmPasswordController.text) {
+        showToast(text: 'Passwords do not match', state: ToastStates.ERROR);
+        return;
+      }
+
+      final cubit = RegisterCubit.get(context);
+      cubit.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+        name: _nameController.text.trim(),
+        confirmPassword: _confirmPasswordController.text.trim(),
+      );
+    }
+  }
 
   void _navigateToLogin(BuildContext context) {
     Navigator.pushReplacement(
@@ -146,212 +152,236 @@ class _RegisterScreenState extends State<RegisterScreen>
     final primaryColor = theme.primaryColor;
     final onPrimaryColor = theme.colorScheme.onPrimary;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(vertical: 40),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Logo with combined animations
-              AnimatedBuilder(
-                animation: _controller,
-                builder: (context, child) {
-                  return SlideTransition(
-                    position: _logoSlideAnimation,
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: ScaleTransition(
-                        scale: _logoScaleAnimation,
-                        child: SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.35,
-                          child: Image.asset(
-                            'assets/splash_screen/nawel.png',
-                            width: double.infinity,
+    return BlocProvider(
+      create: (BuildContext context) => RegisterCubit(getIt<AuthRepo>()),
+
+      child: BlocConsumer(
+        listener: (context, state) {
+          if (state is RegisterSuccessState) {
+            showToast(
+              text: 'Registration successful',
+              state: ToastStates.SUCCESS,
+            );
+            _navigateToLogin(context);
+          } else if (state is RegisterErrorState) {
+            showToast(text: state.error, state: ToastStates.ERROR);
+          }
+        },
+        builder: (BuildContext context, Object? state) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Logo with combined animations
+                    AnimatedBuilder(
+                      animation: _controller,
+                      builder: (context, child) {
+                        return SlideTransition(
+                          position: _logoSlideAnimation,
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: ScaleTransition(
+                              scale: _logoScaleAnimation,
+                              child: SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.35,
+                                child: Image.asset(
+                                  'assets/splash_screen/nawel.png',
+                                  width: double.infinity,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
 
-              // Form with animations
-              AnimatedBuilder(
-                animation: _controller,
-                builder: (context, child) {
-                  return SlideTransition(
-                    position: _formSlideAnimation,
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: ScaleTransition(
-                        scale: _formScaleAnimation,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Column(
-                            children: [
-                              // Name Field
-                              _buildAnimatedFormField(
-                                controller: _nameController,
-                                label: 'Full Name',
-                                icon: Icons.person_outline,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your name';
-                                  }
-                                  return null;
-                                },
-                                textInputAction: TextInputAction.next,
-                              ),
-                              const SizedBox(height: 20),
+                    // Form with animations
+                    AnimatedBuilder(
+                      animation: _controller,
+                      builder: (context, child) {
+                        return SlideTransition(
+                          position: _formSlideAnimation,
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: ScaleTransition(
+                              scale: _formScaleAnimation,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                ),
+                                child: Column(
+                                  children: [
+                                    // Name Field
+                                    _buildAnimatedFormField(
+                                      controller: _nameController,
+                                      label: 'Full Name',
+                                      icon: Icons.person_outline,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your name';
+                                        }
+                                        return null;
+                                      },
+                                      textInputAction: TextInputAction.next,
+                                    ),
+                                    const SizedBox(height: 20),
 
-                              // Email Field
-                              _buildAnimatedFormField(
-                                controller: _emailController,
-                                label: 'Email',
-                                icon: Icons.email_outlined,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your email';
-                                  }
-                                  if (!RegExp(
-                                    r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$',
-                                  ).hasMatch(value)) {
-                                    return 'Please enter a valid email';
-                                  }
-                                  return null;
-                                },
-                                keyboardType: TextInputType.emailAddress,
-                                textInputAction: TextInputAction.next,
-                              ),
-                              const SizedBox(height: 20),
+                                    // Email Field
+                                    _buildAnimatedFormField(
+                                      controller: _emailController,
+                                      label: 'Email',
+                                      icon: Icons.email_outlined,
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter your email';
+                                        }
+                                        if (!RegExp(
+                                          r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                        ).hasMatch(value)) {
+                                          return 'Please enter a valid email';
+                                        }
+                                        return null;
+                                      },
+                                      keyboardType: TextInputType.emailAddress,
+                                      textInputAction: TextInputAction.next,
+                                    ),
+                                    const SizedBox(height: 20),
 
-                              // Password Field
-                              _buildAnimatedPasswordField(
-                                controller: _passwordController,
-                                label: 'Password',
-                                obscureText: _obscurePassword,
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                },
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter a password';
-                                  }
-                                  if (value.length < 6) {
-                                    return 'Password must be at least 6 characters';
-                                  }
-                                  return null;
-                                },
-                                textInputAction: TextInputAction.next,
-                              ),
-                              const SizedBox(height: 20),
+                                    // Password Field
+                                    _buildAnimatedPasswordField(
+                                      controller: _passwordController,
+                                      label: 'Password',
+                                      obscureText: _obscurePassword,
+                                      onPressed: () {
+                                        setState(() {
+                                          _obscurePassword = !_obscurePassword;
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter a password';
+                                        }
+                                        if (value.length < 6) {
+                                          return 'Password must be at least 6 characters';
+                                        }
+                                        return null;
+                                      },
+                                      textInputAction: TextInputAction.next,
+                                    ),
+                                    const SizedBox(height: 20),
 
-                              // Confirm Password Field
-                              _buildAnimatedPasswordField(
-                                controller: _confirmPasswordController,
-                                label: 'Confirm Password',
-                                obscureText: _obscureConfirmPassword,
-                                onPressed: () {
-                                  setState(() {
-                                    _obscureConfirmPassword =
-                                        !_obscureConfirmPassword;
-                                  });
-                                },
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please confirm your password';
-                                  }
-                                  return null;
-                                },
-                                textInputAction: TextInputAction.done,
-                              ),
-                              const SizedBox(height: 30),
+                                    // Confirm Password Field
+                                    _buildAnimatedPasswordField(
+                                      controller: _confirmPasswordController,
+                                      label: 'Confirm Password',
+                                      obscureText: _obscureConfirmPassword,
+                                      onPressed: () {
+                                        setState(() {
+                                          _obscureConfirmPassword =
+                                              !_obscureConfirmPassword;
+                                        });
+                                      },
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please confirm your password';
+                                        }
+                                        return null;
+                                      },
+                                      textInputAction: TextInputAction.done,
+                                    ),
+                                    const SizedBox(height: 30),
 
-                              // Register Button with enhanced animation
-                              AnimatedBuilder(
-                                animation: _controller,
-                                builder: (context, child) {
-                                  return ScaleTransition(
-                                    scale: _buttonScaleAnimation,
-                                    child: SizedBox(
-                                      width: buttonWidth,
-                                      height: 50,
-                                      child:
-                                          // state is RegisterLoadingState
-                                          //     ? const Center(
-                                          //   child:
-                                          //   CircularProgressIndicator(),
-                                          // )
-                                          //     :
-                                          ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: primaryColor,
-                                              foregroundColor: onPrimaryColor,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                              elevation: 4,
-                                              shadowColor: primaryColor,
-                                            ),
-                                            onPressed: () {
-                                              // _submitForm(
-                                              //   context,
-                                              // );
-                                            },
-                                            child: const Text(
-                                              'REGISTER',
+                                    // Register Button with enhanced animation
+                                    AnimatedBuilder(
+                                      animation: _controller,
+                                      builder: (context, child) {
+                                        return ScaleTransition(
+                                          scale: _buttonScaleAnimation,
+                                          child: SizedBox(
+                                            width: buttonWidth,
+                                            height: 50,
+                                            child: state is RegisterLoadingState
+                                                ? const Center(
+                                                    child:
+                                                        CircularProgressIndicator(),
+                                                  )
+                                                : ElevatedButton(
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor:
+                                                          primaryColor,
+                                                      foregroundColor:
+                                                          onPrimaryColor,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              10,
+                                                            ),
+                                                      ),
+                                                      elevation: 4,
+                                                      shadowColor: primaryColor,
+                                                    ),
+                                                    onPressed: () {
+                                                      _submitForm(context);
+                                                    },
+                                                    child: const Text(
+                                                      'REGISTER',
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        letterSpacing: 0.5,
+                                                      ),
+                                                    ),
+                                                  ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    const SizedBox(height: 30),
+
+                                    // Login Prompt with animation
+                                    FadeTransition(
+                                      opacity: _fadeAnimation,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                _navigateToLogin(context),
+                                            child: Text(
+                                              'Already have an account?',
                                               style: TextStyle(
-                                                fontSize: 16,
                                                 fontWeight: FontWeight.bold,
-                                                letterSpacing: 0.5,
+                                                color: primaryColor,
+                                                fontSize: 14,
                                               ),
                                             ),
                                           ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              const SizedBox(height: 30),
-
-                              // Login Prompt with animation
-                              FadeTransition(
-                                opacity: _fadeAnimation,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          _navigateToLogin(context),
-                                      child: Text(
-                                        'Already have an account?',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: primaryColor,
-                                          fontSize: 14,
-                                        ),
+                                        ],
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

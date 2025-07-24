@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-
 import '../../models/user_model.dart';
 import '../entities/user_entity.dart';
 import '../firebase/auth_exemption.dart';

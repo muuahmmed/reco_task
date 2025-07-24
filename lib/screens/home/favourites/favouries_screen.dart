@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../components/componets.dart';
-import '../cubit/home_cubit.dart';
 import '../search/search_screen.dart';
 
 class FavouriteScreen extends StatelessWidget {
@@ -8,9 +7,9 @@ class FavouriteScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = HomeShopCubit.get(context);
-    final theme = Theme.of(context);
-    final primaryColor = theme.colorScheme.primary;
+    // final cubit = HomeShopCubit.get(context);
+    // final theme = Theme.of(context);
+    // final primaryColor = theme.colorScheme.primary;
 
     return Scaffold(
       appBar: AppBar(
@@ -22,9 +21,7 @@ class FavouriteScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Column(
-
-      )
+      body: Column(),
     );
   }
 }
