@@ -155,7 +155,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     return BlocProvider(
       create: (BuildContext context) => RegisterCubit(getIt<AuthRepo>()),
 
-      child: BlocConsumer(
+      child: BlocConsumer<RegisterCubit, RegisterStates>(
         listener: (context, state) {
           if (state is RegisterSuccessState) {
             showToast(
