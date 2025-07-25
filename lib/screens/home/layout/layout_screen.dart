@@ -62,7 +62,6 @@ class _LayoutScreenState extends State<LayoutScreen>
     super.dispose();
   }
 
-  // final user = Supabase.instance.client.auth.currentUser;
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
@@ -193,8 +192,7 @@ class _LayoutScreenState extends State<LayoutScreen>
                       ),
                     ],
                   ),
-                  child:Text('data'),
-                  // child: Text('Hi ${user?.userMetadata?['name']} !'),
+                  child: Text('Hi !'),
                 ),
                 const Spacer(),
                 AnimatedRotation(

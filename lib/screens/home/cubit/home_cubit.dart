@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:reco_test/screens/home/favourites/favouries_screen.dart';
 import '../cart/cart_screen.dart';
-import '../categories/categories.dart';
 import '../layout/layout_screen.dart';
 import '../profile/profile_screen.dart';
 import 'home_states.dart';
@@ -24,7 +23,6 @@ class HomeShopCubit extends Cubit<HomeShopStates> {
 
   final List<Widget> bottomScreens = [
     LayoutScreen(),
-    const CategoriesScreen(),
     const FavouriteScreen(),
     const CartScreen(),
     const ProfileScreen(),

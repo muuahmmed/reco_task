@@ -24,15 +24,16 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
             switchInCurve: Curves.easeInOutCubic,
             switchOutCurve: Curves.easeInOutCubic,
             transitionBuilder: (Widget child, Animation<double> animation) {
-              final slideAnimation = Tween<Offset>(
-                begin: const Offset(0.2, 0),
-                end: Offset.zero,
-              ).animate(
-                CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeInOutCubic,
-                ),
-              );
+              final slideAnimation =
+                  Tween<Offset>(
+                    begin: const Offset(0.2, 0),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeInOutCubic,
+                    ),
+                  );
 
               return FadeTransition(
                 opacity: animation,
@@ -51,6 +52,9 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
   }
 
   Widget _buildAnimatedBottomBar(HomeShopCubit cubit) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final bottomBarHeight = screenHeight * 0.10; // 10% of screen height
+
     return Container(
       decoration: BoxDecoration(
         boxShadow: [
@@ -66,14 +70,14 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          height: 70,
+          height: bottomBarHeight, // Use dynamic height
           color: Colors.white,
           child: BottomNavigationBar(
             currentIndex: cubit.currentIndex,
             onTap: (index) {
               cubit.changeBottomNav(index);
             },
-            selectedItemColor:  Color(0xFF8900FE),
+            selectedItemColor: const Color(0xFF8900FE),
             unselectedItemColor: Colors.grey,
             backgroundColor: Colors.white,
             selectedFontSize: 12,
@@ -87,28 +91,22 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
                 isActive: cubit.currentIndex == 0,
               ),
               _buildBottomBarItem(
-                activeIcon: Icons.category,
-                inactiveIcon: Icons.category_outlined,
-                label: 'Categories',
-                isActive: cubit.currentIndex == 1,
-              ),
-              _buildBottomBarItem(
                 activeIcon: Icons.favorite,
                 inactiveIcon: Icons.favorite_border,
-                label: 'Favourites',
-                isActive: cubit.currentIndex == 2,
+                label: 'Fav',
+                isActive: cubit.currentIndex == 1,
               ),
               _buildBottomBarItem(
                 activeIcon: Icons.shopping_cart,
                 inactiveIcon: Icons.shopping_cart_outlined,
                 label: 'Cart',
-                isActive: cubit.currentIndex == 3,
+                isActive: cubit.currentIndex == 2,
               ),
               _buildBottomBarItem(
                 activeIcon: Icons.person,
                 inactiveIcon: Icons.person_outline,
                 label: 'Profile',
-                isActive: cubit.currentIndex == 4,
+                isActive: cubit.currentIndex == 3,
               ),
             ],
           ),
@@ -135,14 +133,9 @@ class _MainHomeScreenState extends State<MainHomeScreen> {
               child: FadeTransition(opacity: animation, child: child),
             );
           },
-          child:
-          isActive
+          child: isActive
               ? Icon(activeIcon, size: 28, key: ValueKey('active_$label'))
-              : Icon(
-            inactiveIcon,
-            size: 24,
-            key: ValueKey('inactive_$label'),
-          ),
+              : Icon(inactiveIcon, size: 24, key: ValueKey('inactive_$label')),
         ),
       ),
       label: label,
