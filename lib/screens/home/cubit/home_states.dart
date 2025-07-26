@@ -23,3 +23,7 @@ class ShopCategoryChangedState extends HomeShopStates {
 
   ShopCategoryChangedState(this.selectedIndex);
 }
+
+class CartUpdatedState extends HomeShopStates {}
+
+class FavoritesUpdatedState extends HomeShopStates {}

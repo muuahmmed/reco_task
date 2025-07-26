@@ -16,11 +16,6 @@ class HomeShopCubit extends Cubit<HomeShopStates> {
   int selectedCategoryIndex = 0;
   double deliveryFee = 5.0;
 
-  // final SupabaseClient _client = Supabase.instance.client;
-  //
-  // // Get the current user's UID from Supabase
-  // String? get uid => _client.auth.currentUser?.id;
-
   final List<Widget> bottomScreens = [
     LayoutScreen(),
     const FavouriteScreen(),
@@ -45,23 +40,46 @@ class HomeShopCubit extends Cubit<HomeShopStates> {
     }
   }
 
-  // Example: Load user-specific data (e.g., cart, favorites)
-  // Future<void> loadUserCartItems() async {
-  //   if (uid == null) {
-  //     emit(HomeShopErrorState('User not logged in'));
-  //     return;
-  //   }
-  //
-  //   try {
-  //     final response = await _client
-  //         .from('cart_items')
-  //         .select()
-  //         .eq('user_id', uid!);
-  //
-  //     // Handle the data
-  //     emit(HomeShopSuccessState('Cart loaded: ${response.length} items'));
-  //   } catch (e) {
-  //     emit(HomeShopErrorState('Failed to load cart: $e'));
-  //   }
-  // }
+  List<Map<String, dynamic>> cartItems = [];
+  List<Map<String, dynamic>> favoriteItems = [];
+
+  void addToCart(Map<String, dynamic> item) {
+    final existingIndex = cartItems.indexWhere((cartItem) => cartItem['name'] == item['name']);
+    if (existingIndex >= 0) {
+      cartItems[existingIndex]['quantity'] = (cartItems[existingIndex]['quantity'] ?? 1) + 1;
+    } else {
+      cartItems.add({...item, 'quantity': 1});
+    }
+    emit(CartUpdatedState());
+  }
+
+  void updateCartItemQuantity(int index, int newQuantity) {
+    if (newQuantity > 0) {
+      cartItems[index]['quantity'] = newQuantity;
+    } else {
+      cartItems.removeAt(index);
+    }
+    emit(CartUpdatedState());
+  }
+
+  void toggleFavorite(Map<String, dynamic> item) {
+    final existingIndex = favoriteItems.indexWhere((favItem) => favItem['name'] == item['name']);
+    if (existingIndex >= 0) {
+      favoriteItems.removeAt(existingIndex);
+    } else {
+      favoriteItems.add(item);
+    }
+    emit(FavoritesUpdatedState());
+  }
+
+  bool isFavorite(Map<String, dynamic> item) {
+    return favoriteItems.any((favItem) => favItem['name'] == item['name']);
+  }
+
+  double get subtotal {
+    return cartItems.fold(0.0, (sum, item) => sum + (item['price'] * (item['quantity'] ?? 1)));
+  }
+
+  double get total => subtotal + deliveryFee;
 }
+
