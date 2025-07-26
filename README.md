@@ -1,16 +1,43 @@
-# reco_test
+# RECO - Flutter E-Commerce App
 
-A new Flutter project.
+![App Screenshot](assets/screenshots/home.png) <!-- Add your own screenshot later -->
 
-## Getting Started
+A production-ready e-commerce application built with Flutter and Firebase, implementing clean architecture with BLoC pattern.
 
-This project is a starting point for a Flutter application.
+## 🔥 Key Features
 
-A few resources to get you started if this is your first Flutter project:
+- **User System**
+  - Secure email/password authentication
+  - Profile management
+  - Password recovery
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Shopping Flow**
+  - Product catalog with categories
+  - Cart functionality with quantity control
+  - Wishlist/Favorites system
+  - Order history
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **Tech Stack**
+  - Flutter 3.x + Dart 2.17
+  - Firebase Auth & Firestore
+  - BLoC state management
+  - get_it dependency injection
+  - SharedPreferences caching
+
+## 🛠️ Installation
+
+```bash
+# 1. Clone repository
+git clone https://github.com/YOUR_USERNAME/reco_test.git
+cd reco_test
+
+# 2. Install dependencies
+flutter pub get
+
+# 3. Set up Firebase:
+#    - Create project at firebase.google.com
+#    - Add Android/iOS apps and download config files
+#    - Enable Email/Password auth
+
+# 4. Run the app
+flutter run
