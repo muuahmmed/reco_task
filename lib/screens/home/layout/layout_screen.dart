@@ -132,6 +132,7 @@ class _LayoutScreenState extends State<LayoutScreen>
 
   // Animated Header
   Widget _buildAnimatedHeader(BuildContext context) {
+    final cubit = HomeShopCubit.get(context);
     final screenSize = MediaQuery.of(context).size;
 
     return AnimatedContainer(
@@ -187,7 +188,7 @@ class _LayoutScreenState extends State<LayoutScreen>
                       ),
                     ],
                   ),
-                  child: Text('Hi !'),
+                  child: Text('Hi ${cubit.user?.name.split(' ').first ?? ''}!'),
                 ),
                 const Spacer(),
                 AnimatedRotation(
@@ -195,9 +196,10 @@ class _LayoutScreenState extends State<LayoutScreen>
                   turns: 1,
                   child: CircleAvatar(
                     radius: screenSize.width * 0.07,
-                    backgroundImage: const AssetImage(
-                      'assets/splash_screen/nawel.png',
-                    ),
+                    backgroundImage: cubit.user?.photoUrl != null
+                        ? NetworkImage(cubit.user!.photoUrl!)
+                        : const AssetImage('assets/splash_screen/nawel.png')
+                    as ImageProvider,
                   ),
                 ),
               ],

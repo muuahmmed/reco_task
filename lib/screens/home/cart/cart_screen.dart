@@ -45,7 +45,7 @@ class _CartScreenState extends State<CartScreen> with TickerProviderStateMixin {
       appBar: AppBar(
         title: const Text('Your Cart'),
         centerTitle: true,
-        backgroundColor: primaryColor,
+        backgroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_outline),

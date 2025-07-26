@@ -1,83 +1,83 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../components/componets.dart';
+import '../cubit/home_cubit.dart';
+import '../cubit/home_states.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // final user = Supabase.instance.client.auth.currentUser;
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
+    final cubit = HomeShopCubit.get(context);
 
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              // Navigate to edit profile screen
-              navigateTo(context, '/edit-profile');
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Profile Avatar
-            Stack(
-              alignment: Alignment.bottomRight,
-              children: [
-                CircleAvatar(
-                  radius: 60,
-                  backgroundImage:
-                  // user?.userMetadata?['avatar_url'] != null
-                  //     ?
-                  NetworkImage(
-                    // user!.userMetadata!['avatar_url'] as String,
-                    '',
-                  )
-            //           :
-            // const AssetImage('assets/splash_screen/nawel.png')
-            //       as ImageProvider,
-                ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: theme.primaryColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.camera_alt,
-                    size: 20,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
+        appBar: AppBar(
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
+                // Navigate to edit profile screen
+                navigateTo(context, '/edit-profile');
+              },
             ),
-            const SizedBox(height: 20),
+          ],
+        ),
+        body: BlocBuilder<HomeShopCubit, HomeShopStates>(
+            builder: (context, state) {
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Profile Avatar
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        CircleAvatar(
+                          radius: 60,
+                          backgroundImage: cubit.user?.photoUrl != null
+                              ? NetworkImage(cubit.user!.photoUrl!)
+                              : const AssetImage('assets/splash_screen/nawel.png')
+                          as ImageProvider,
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: theme.primaryColor,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
 
-            // User Name
-            Text(
-              'No Name',
-              // user?.userMetadata?['name'] ?? 'No Name',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
+                    // User Name
+                    Text(
+                      cubit.user?.name ?? 'No Name',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
 
-            // User Email
-            Text(
-              'No mail',
-              // user?.email ?? 'No Email',
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-              ),
-            ),
-            const SizedBox(height: 30),
+                    // User Email
+                    Text(
+                      cubit.user?.email ?? 'No Email',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
 
             // Profile Sections
             _buildProfileSection(
@@ -127,7 +127,7 @@ class ProfileScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      );})
     );
   }
 
